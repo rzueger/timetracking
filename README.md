@@ -13,7 +13,7 @@ Add file `.env.local` with the following content (replace '${placeholders}' with
 ```
 TOGGL_PROJECT_ID=${toggl project id}
 TOGGL_USERNAME=${toggl username}
-TOGGL_PASSWORD=${project id}
+TOGGL_API_TOKEN=${toggl api token}
 ```
 
 Call script:
