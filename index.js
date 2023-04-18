@@ -5,9 +5,9 @@ const BASE_URL = 'https://api.track.toggl.com/api/v9'
 
 dotenv.config({path: '.env.local'})
 
-const getEnvVar = name => {
+const getEnvVar = (name, mandatory) => {
     const variable = process.env[name]
-    if (!variable) {
+    if (!variable && mandatory) {
         throw new Error(`Variable ${name} is not set in the environment`)
     }
     return variable
@@ -28,7 +28,7 @@ const getMonthArg = () => {
 
 const base64 = str => Buffer.from(str).toString('base64')
 
-let authorization = `Basic ${base64(`${getEnvVar('TOGGL_API_TOKEN')}:api_token`)}`;
+const authorization = `Basic ${base64(`${getEnvVar('TOGGL_API_TOKEN', true)}:api_token`)}`;
 
 async function getEntries(startDate, endDate, projectId) {
     const response = await fetch(`${BASE_URL}/me/time_entries?start_date=${startDate}&end_date=${endDate}`, {
@@ -40,7 +40,7 @@ async function getEntries(startDate, endDate, projectId) {
     })
     const entries = await response.json()
 
-    return entries.filter(entry => entry.project_id === projectId)
+    return projectId ? entries.filter(entry => entry.project_id === projectId) : entries
 }
 
 const groupByDay = entries => {
@@ -179,8 +179,8 @@ const printEntries = byDay => {
 }
 
 async function showEntries() {
-    const projectId = parseInt(getEnvVar('TOGGL_PROJECT_ID'))
-
+    const projectId = parseInt(getEnvVar('TOGGL_PROJECT_ID'), 10)
+    
     const monthArg = getMonthArg()
     const startDate = monthArg + '-01'
     const endDate = moment(startDate, 'YYYY-MM-DD').add(1, 'months').format('YYYY-MM-DD')
