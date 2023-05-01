@@ -150,7 +150,7 @@ const getTotalDurationSum = day =>
 const printEntries = byDay => {
     byDay.forEach(day => {
         console.log('**************************************')
-        console.log(day.day)
+        console.log(`${day.day} (${moment(day.day).format('dddd')})`)
         console.log('**************************************\n')
 
         day.records.forEach(record => {
