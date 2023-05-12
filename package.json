@@ -10,9 +10,10 @@
   "license": "ISC",
   "dependencies": {
     "dotenv": "^16.0.3",
-    "moment": "^2.29.4"
+    "moment": "^2.29.4",
+    "moment-duration-format": "^2.3.2"
   },
-  "engines" : {
-    "node" : ">=18.0.0"
+  "engines": {
+    "node": ">=18.0.0"
   }
 }

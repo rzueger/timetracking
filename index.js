@@ -1,5 +1,9 @@
 const moment = require('moment')
+const momentDurationFormatSetup = require("moment-duration-format");
 const dotenv = require('dotenv')
+
+// attach momentDuration plugin to moment
+momentDurationFormatSetup(moment);
 
 const BASE_URL = 'https://api.track.toggl.com/api/v9'
 
@@ -178,9 +182,24 @@ const printEntries = byDay => {
     })
 }
 
+const printMonthSummary = byDay => {
+    if (byDay.length > 0) {
+        console.log('**************************************')
+        console.log(`Summary for month ${moment(byDay[0].month).format('MMMM')} ${moment(byDay[0].year).format('YYYY')}`)
+        console.log('**************************************\n')
+
+        let totalWorkDuration = byDay.map(day => getTotalDurationSum(day)).reduce((sum, dayTotal) => sum + moment.duration(dayTotal).asMinutes(), 0)
+
+        console.log(`Total work duration: ${moment.duration(totalWorkDuration, "minutes").format("HH:mm")}`)
+
+        let averageWorkHoursPerDay = totalWorkDuration / byDay.length
+        console.log(`Average work hours per day: ${moment.duration(averageWorkHoursPerDay, "minutes").format("HH:mm")}`)
+    }
+}
+
 async function showEntries() {
     const projectId = parseInt(getEnvVar('TOGGL_PROJECT_ID'), 10)
-    
+
     const monthArg = getMonthArg()
     const startDate = monthArg + '-01'
     const endDate = moment(startDate, 'YYYY-MM-DD').add(1, 'months').format('YYYY-MM-DD')
@@ -189,6 +208,7 @@ async function showEntries() {
     const byDay = groupByDay(entries)
     addTimeBlocks(byDay)
     printEntries(byDay)
+    printMonthSummary(byDay)
 }
 
 showEntries()
