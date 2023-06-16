@@ -17,17 +17,23 @@ const getEnvVar = (name, mandatory) => {
     return variable
 }
 
+const isCommand = (tokens) => {
+    const args = process.argv.slice(2) // Remove the first two arguments
+    const command = args[0]
+
+    // Check if the argument exists and is in the format 'yyyy-mm'
+    return !command || tokens.includes(command);
+}
+
 const getMonthArg = () => {
     const args = process.argv.slice(2) // Remove the first two arguments
     const monthArg = args[0]
 
     // Check if the argument exists and is in the format 'yyyy-mm'
-    if (!monthArg || !/^\d{4}-\d{2}$/.test(monthArg)) {
-        console.error('Usage: node index.js <month (yyyy-mm)>');
-        process.exit(1);
+    if (monthArg && /^\d{4}-\d{2}$/.test(monthArg)) {
+        return monthArg
     }
-
-    return monthArg
+    return null
 }
 
 const base64 = str => Buffer.from(str).toString('base64')
@@ -211,4 +217,43 @@ async function showEntries() {
     printMonthSummary(byDay)
 }
 
-showEntries()
+const showHelp = () => {
+    console.log('**************************************')
+    console.log('year-month\tShow all entries and a summary for the month and project (TOGGL_PROJECT_ID)')
+    console.log('Example: node index.js 2023-06\n')
+    console.log('p, projects\tShow a list of your projects')
+    console.log('Example: node index.js p\n')
+    console.log('h, help\tshow this help')
+    console.log('Example: node index.js h')
+    console.log('**************************************')
+}
+
+async function showProjects() {
+    const response = await fetch(`${BASE_URL}/me/projects`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': authorization
+        }
+    })
+    const entries = await response.json()
+
+    console.log('**************************************')
+    console.log('Your currently active projects:')
+    entries.forEach(entry => {
+        console.log("'" + entry.name + "' --> " + entry.id)
+    })
+    console.log('**************************************')
+}
+
+async function run() {
+    if (getMonthArg() !== null) {
+        await showEntries();
+    } else if (isCommand("p", "projects")) {
+        await showProjects();
+    } else {
+        showHelp()
+    }
+}
+
+run()
