@@ -94,7 +94,7 @@ and click on "Share" on Google Doc to grant Editor access to the new document.
 ```
 node invoice.js ${month-arg in yyyy-mm} ${invoice-no} ${hourly-rate} ${document id}
 ```
-e.g. `node invoice.js 2023-12 20230897 70 1eDKe5SyiKLPAFdPgsuXdMT1sheIhvcOnfQafyNMsf9wasdfasdf`
+e.g. `node invoice.js 2023-12 20230897 120 1eDKe5SyiKLPAFdPgsuXdMT1sheIhvcOnfQafyNMsf9wasdfasdf`
    
 This replaces all the variables in the documents and inserts the time records into the
 prepared table.
