@@ -18,7 +18,14 @@ function getDurationSeconds(startTime, endTime) {
     const startMoment = moment(startTime, format);
     const endMoment = moment(endTime, format);
 
-    return endMoment.diff(startMoment, 'seconds');
+    let durationSeconds = endMoment.diff(startMoment, 'seconds');
+
+    if (durationSeconds < 0) { // end time after midnight (add 24h in seconds)
+        const secondsInDay = 24 * 60 * 60
+        durationSeconds = secondsInDay + durationSeconds
+    }
+
+    return durationSeconds;
 }
 
 function getIssueName(description) {
@@ -155,7 +162,7 @@ function containsRecord(tempoWorklogs, record) {
     if (existingWorklog) {
         const recordDuration = getDurationSeconds(record.startTime, record.endTime)
         if (recordDuration !== existingWorklog.timeSpentSeconds) {
-            throw new Error(`Worklog entry with same start time found (${existingWorklog.startDate} ${existingWorklog.startTime}), but with duration ${existingWorklog.timeSpentSeconds} instead of ${recordDuration}`)
+            throw new Error(`Worklog entry with same start time found (${existingWorklog.startDate} ${existingWorklog.startTime}), but with duration ${existingWorklog.timeSpentSeconds} instead of ${recordDuration}`);
         }
         // todo: also check other fields like selected ticket
         return true
