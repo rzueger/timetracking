@@ -211,6 +211,9 @@ async function pushToJira(params) {
     }
 
     console.log('Completed!')
+    if (!commit) {
+        console.log(`This was a dry run. Run the following command to actually push to JIRA: node push-jira ${monthArg} commit`)
+    }
 }
 
 const showHelp = () => {
