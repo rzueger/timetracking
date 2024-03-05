@@ -172,22 +172,28 @@ function containsRecord(tempoWorklogs, record) {
 }
 
 async function pushDay(entry, jiraAccountId, commit) {
+    let expectedTempoLogCount = 0
+
     if (entry.records.length > 0) {
         const tempoWorklogs = await getTempoWorklogs(entry.day, jiraAccountId);
         for (const record of entry.records) {
             const recordInfo = await getRecordInfo(entry.day, record)
-            if (containsRecord(tempoWorklogs, record)) {
+            if(isNaN(recordInfo.timeSpentSeconds)){
+                console.log(`Record is ongoing: ${recordInfoStr(recordInfo)}. Skipping...`)
+            } else if (containsRecord(tempoWorklogs, record)) {
                 console.log(`Record exists: ${recordInfoStr(recordInfo)}. Skipping...`)
+                expectedTempoLogCount++
             } else {
                 await pushRecord(recordInfo, jiraAccountId, commit)
+                expectedTempoLogCount++
             }
         }
     }
 
     if (commit) {
         const tempoWorklogsAfterPush = await getTempoWorklogs(entry.day, jiraAccountId);
-        if (tempoWorklogsAfterPush.length !== entry.records.length) {
-            throw new Error(`Tempo has ${tempoWorklogsAfterPush.length} worklogs, but should have ${entry.records.length} on day ${entry.day}`)
+        if (tempoWorklogsAfterPush.length !== expectedTempoLogCount) {
+            throw new Error(`Tempo has ${tempoWorklogsAfterPush.length} worklogs, but should have ${expectedTempoLogCount} on day ${entry.day}`)
         }
     }
 }
