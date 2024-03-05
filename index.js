@@ -74,19 +74,40 @@ const printEntries = byDay => {
     })
 }
 
-const printMonthSummary = byDay => {
+const printMonthSummary = (byDay, monthArg) => {
     if (byDay.length > 0) {
         console.log('**************************************')
         console.log(`Summary for month ${moment(byDay[0].day).format('MMMM')} ${moment(byDay[0].day).format('YYYY')}`)
         console.log('**************************************\n')
 
-        let totalWorkDuration = byDay.map(day => day.hoursTotal).reduce((sum, dayTotal) => sum + moment.duration(dayTotal).asMinutes(), 0)
+        const totalWorkDuration = byDay.map(day => day.hoursTotal).reduce((sum, dayTotal) => sum + moment.duration(dayTotal).asMinutes(), 0)
 
         console.log(`Total work duration: ${moment.duration(totalWorkDuration, "minutes").format("HH:mm")}`)
 
-        let averageWorkHoursPerDay = totalWorkDuration / byDay.length
-        console.log(`Average work hours per day: ${moment.duration(averageWorkHoursPerDay, "minutes").format("HH:mm")}`)
+        const averageWorkHoursPerWorkingDay = totalWorkDuration / getWorkingDayCount(monthArg)
+        console.log(`Average work hours per working day: ${moment.duration(averageWorkHoursPerWorkingDay, "minutes").format("HH:mm")}`)
     }
+}
+
+const getWorkingDayCount = (monthArg) => {
+    const daysInMonth = moment(monthArg, 'YYYY-MM').daysInMonth();
+    const today = moment()
+
+    let workingDayCount = 0;
+
+    for (let day = 1; day <= daysInMonth; day++) {
+        const date = moment(`${monthArg}-${day}`, 'YYYY-MM-DD');
+
+        if (date.isAfter(today)) {
+            return workingDayCount
+        }
+
+        if (date.isoWeekday() >= 1 && date.isoWeekday() <= 5) { // Monday to Friday
+            workingDayCount++
+        }
+    }
+
+    return workingDayCount;
 }
 
 async function showEntries() {
@@ -94,7 +115,7 @@ async function showEntries() {
 
     const byDay = await getEntriesByDay(monthArg, authorization)
     printEntries(byDay)
-    printMonthSummary(byDay)
+    printMonthSummary(byDay, monthArg)
 }
 
 const showHelp = () => {
