@@ -43,7 +43,7 @@ function getIssueName(description) {
             throw new Error('No valid issue name found in the description: ' + description);
         }
     } else {
-       throw new Error('No valid issue name found in the description: ' + description);
+        throw new Error('No valid issue name found in the description: ' + description);
     }
 }
 
@@ -178,8 +178,10 @@ async function pushDay(entry, jiraAccountId, commit) {
         const tempoWorklogs = await getTempoWorklogs(entry.day, jiraAccountId);
         for (const record of entry.records) {
             const recordInfo = await getRecordInfo(entry.day, record)
-            if(isNaN(recordInfo.timeSpentSeconds)){
+            if (isNaN(recordInfo.timeSpentSeconds)) {
                 console.log(`Record is ongoing: ${recordInfoStr(recordInfo)}. Skipping...`)
+            } else if (recordInfo.timeSpentSeconds === 0) {
+                console.log(`Record is has 0 seconds logged: ${recordInfoStr(recordInfo)}. Skipping...`)
             } else if (containsRecord(tempoWorklogs, record)) {
                 console.log(`Record exists: ${recordInfoStr(recordInfo)}. Skipping...`)
                 expectedTempoLogCount++
