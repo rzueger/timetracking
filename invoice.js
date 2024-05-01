@@ -142,7 +142,7 @@ async function writeGoogleDoc(params) {
 
         await updateDoc(documentId, tableTextRequests)
 
-        console.log('Completed!')
+        console.log(`Completed! (Total hours: ${formatDecimalNumber(totalHours)})`)
     } catch (error) {
         console.error('Error writing invoice:', error);
         console.log(`Did you grant Editor access to the service account '${credentials.client_email}'?`)
