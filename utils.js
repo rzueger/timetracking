@@ -51,7 +51,7 @@ const groupByDay = entries => {
         })
     })
 
-    ordered.sort((day1, day2) => day1.day - day2.day)
+    ordered.sort((day1, day2) => new Date(day1.day) - new Date(day2.day))
 
     return ordered
 }

@@ -210,8 +210,6 @@ async function pushToJira(params) {
 
     const entries = await getEntriesByDay(monthArg, togglAuthorization)
 
-    entries.reverse()
-
     const jiraAccountId = await getJiraAccountId()
 
     for (const entry of entries) {

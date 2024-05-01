@@ -99,7 +99,7 @@ async function writeGoogleDoc(params) {
     const {monthArg, documentId, invoiceNo, hourlyRate} = params
 
     const entries = await getEntriesByDay(monthArg, togglAuth)
-    const invoiceRows = togglEntriesToInvoiceRows(entries, hourlyRate).reverse()
+    const invoiceRows = togglEntriesToInvoiceRows(entries, hourlyRate)
 
     const totalHours = entries.map(day => day.hoursTotalDecimal).reduce((sum, dayTotal) => sum + dayTotal, 0)
     const totalPrice = totalHours * hourlyRate
