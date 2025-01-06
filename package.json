@@ -4,7 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "setup": "node setup.js",
+    "push:this-month": "node push-jira.js \"$(date +'%Y-%m')\"",
+    "push:today": "node push-jira.js \"$(date +'%Y-%m-%d')\""
   },
   "author": "",
   "license": "ISC",
