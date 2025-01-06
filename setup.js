@@ -1,22 +1,8 @@
+const path = require('path');
 const fs = require('fs');
-const readline = require('node:readline');
+const { question } = require('./utils');
 
-const ENV_FILE = '.env.local'
-
-function question(question) {
-  return new Promise((resolve) => {
-    const rl = readline.createInterface({
-      input: process.stdin,
-      output: process.stdout,
-    });
-
-
-    rl.question(question, answer => {
-      resolve(answer)
-      rl.close();
-    });
-  })
-}
+const ENV_FILE = path.join(__dirname, '.env.local')
 
 async function setup() {
   try {
@@ -24,7 +10,8 @@ async function setup() {
 
     if (fs.existsSync(ENV_FILE)) {
       console.error(`'${ENV_FILE}' file already exists. Delete file before start setup again.`)
-      return false
+      await question('Press any key to exit...')
+      return
     }
 
     const togglApiToken = await question('Toggl API Token \x1b[90m(https://track.toggl.com/profile)\x1b[0m: ')
@@ -46,8 +33,10 @@ TEMPO_API_TOKEN=${tempoApiToken}
     fs.writeFileSync(ENV_FILE, env)
 
     console.log(`\x1b[92m✨ Setup completed. Start pushing Toggl time entries to Tempo.\x1b[0m`)
+    await question('Press ENTER to exit...')
   } catch (error) {
     console.error(`💥 Setup failed.`, error, error.stack)
+    await question('Press ENTER to exit...')
   }
 }
 

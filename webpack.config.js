@@ -1,5 +1,6 @@
 const path = require('path');
 const webpackNodeExternals = require('webpack-node-externals');
+const CopyPlugin = require('copy-webpack-plugin');
 
 module.exports = {
   mode: 'production',
@@ -14,5 +15,12 @@ module.exports = {
     clean: true,
     libraryTarget: 'commonjs2'
   },
-  externals: [webpackNodeExternals()]
+  externals: [webpackNodeExternals()],
+  plugins: [
+    new CopyPlugin({
+      patterns: [
+        { from: 'assets', to: '' }
+      ],
+    }),
+  ],
 };

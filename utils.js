@@ -1,6 +1,22 @@
+const readline = require('node:readline');
 const moment = require('moment')
 
 const BASE_URL = 'https://api.track.toggl.com/api/v9'
+
+function question(question) {
+    return new Promise((resolve) => {
+        const rl = readline.createInterface({
+            input: process.stdin,
+            output: process.stdout,
+        });
+
+
+        rl.question(question, answer => {
+            resolve(answer)
+            rl.close();
+        });
+    })
+}
 
 async function getEntries(startDate, endDate, projectId, authorization) {
     const response = await fetch(`${BASE_URL}/me/time_entries?start_date=${startDate}&end_date=${endDate}`, {
@@ -189,5 +205,6 @@ module.exports = {
     getArgs,
     getMonthArg,
     getDayArg,
-    base64
+    base64,
+    question
 }

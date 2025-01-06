@@ -1,8 +1,9 @@
+const path = require('path');
 const moment = require('moment')
-const { getEntriesByDay, getEnvVar, base64, getMonthArg, getDayArg, getEntriesForDay } = require("./utils");
+const { getEntriesByDay, getEnvVar, base64, getMonthArg, getDayArg, getEntriesForDay, question } = require("./utils");
 const dotenv = require("dotenv");
 
-dotenv.config({ path: '.env.local' })
+dotenv.config({ path: path.join(__dirname, '.env.local') })
 
 const JIRA_BASE_URL = `https://${getEnvVar('JIRA_DOMAIN', true)}.atlassian.net/rest/api/3`
 const TEMPO_BASE_URL = 'https://api.tempo.io/4'
@@ -254,6 +255,7 @@ async function pushWorklogs() {
         };
 
         await pushToJira(params)
+        await question('Press ENTER to exit...')
     } else {
         showHelp()
     }
