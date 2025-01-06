@@ -115,3 +115,10 @@ e.g. `node invoice.js 2023-12 20230897 120 1eDKe5SyiKLPAFdPgsuXdMT1sheIhvcOnfQaf
 
 This replaces all the variables in the documents and inserts the time records into the
 prepared table.
+
+## Build
+With webpack the setup and push-jira scripts are builded to a `dist` folder by running:
+
+```
+npm run build
+```
