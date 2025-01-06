@@ -1,5 +1,4 @@
 const path = require('path');
-const webpackNodeExternals = require('webpack-node-externals');
 const CopyPlugin = require('copy-webpack-plugin');
 
 module.exports = {
@@ -9,13 +8,16 @@ module.exports = {
     setup: './setup.js',
     push: './push-jira.js',
   },
+  optimization: {
+    usedExports: true,
+    sideEffects: true,
+  },
   output: {
     filename: '[name].js',
     path: path.resolve(__dirname, 'dist'),
     clean: true,
     libraryTarget: 'commonjs2'
   },
-  externals: [webpackNodeExternals()],
   plugins: [
     new CopyPlugin({
       patterns: [
