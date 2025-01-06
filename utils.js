@@ -102,6 +102,21 @@ const getTotalDurationSum = day =>
         return formatDuration(newDurationSum)
     }, '00:00')
 
+// dayArg: YYYY-MM-DD
+const getEntriesForDay = async (dayArg, authorization) => {
+    const projectId = parseInt(getEnvVar('TOGGL_PROJECT_ID'), 10)
+
+    const startDate = dayArg
+    const endDate = moment(startDate, 'YYYY-MM-DD').add(1, 'day').format('YYYY-MM-DD')
+
+    const entries = await getEntries(startDate, endDate, projectId, authorization)
+    const byDay = groupByDay(entries)
+    addTimeBlocks(byDay)
+    addDailyHoursTotal(byDay)
+
+    return byDay
+}
+
 // monthArg: YYYY-MM
 const getEntriesByDay = async (monthArg, authorization) => {
     const projectId = parseInt(getEnvVar('TOGGL_PROJECT_ID'), 10)
@@ -153,12 +168,26 @@ const getMonthArg = () => {
     return null
 }
 
+const getDayArg = () => {
+    const args = getArgs()
+    const dayArg = args[0]
+
+    // Check if the argument exists and is in the format 'yyyy-mm-dd'
+    if (dayArg && /^\d{4}-\d{2}-\d{2}$/.test(dayArg)) {
+        return dayArg
+    }
+    return null
+}
+
+
 const base64 = str => Buffer.from(str).toString('base64')
 
 module.exports = {
     getEntriesByDay,
+    getEntriesForDay,
     getEnvVar,
     getArgs,
     getMonthArg,
+    getDayArg,
     base64
 }

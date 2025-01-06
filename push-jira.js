@@ -1,8 +1,8 @@
 const moment = require('moment')
-const {getEntriesByDay, getEnvVar, base64, getMonthArg} = require("./utils");
+const { getEntriesByDay, getEnvVar, base64, getMonthArg, getDayArg, getEntriesForDay } = require("./utils");
 const dotenv = require("dotenv");
 
-dotenv.config({path: '.env.local'})
+dotenv.config({ path: '.env.local' })
 
 const JIRA_BASE_URL = `https://${getEnvVar('JIRA_DOMAIN', true)}.atlassian.net/rest/api/3`
 const TEMPO_BASE_URL = 'https://api.tempo.io/4'
@@ -117,7 +117,7 @@ async function saveTempoWorklog(jiraAccountId, recordInfo) {
 }
 
 async function getRecordInfo(day, record) {
-    const {startTime, endTime, description} = record
+    const { startTime, endTime, description } = record
 
     const timeSpentSeconds = getDurationSeconds(startTime, endTime)
     const issueName = getIssueName(description)
@@ -201,14 +201,15 @@ async function pushDay(entry, jiraAccountId, commit) {
 }
 
 async function pushToJira(params) {
-    const {monthArg, commit} = params
+    const { monthArg, dayArg, commit } = params
 
+    const period = dayArg ? `for the day ${dayArg}` : `for the month ${monthArg}`
     console.log(commit
-        ? `Pushing records to Jira for the month ${monthArg}`
-        : `Logging what would be pushed to Jira for the month ${monthArg}`
+        ? `Pushing records to Jira ${period}`
+        : `Logging what would be pushed to Jira ${period}`
     )
 
-    const entries = await getEntriesByDay(monthArg, togglAuthorization)
+    const entries = dayArg ? await getEntriesForDay(dayArg, togglAuthorization) : await getEntriesByDay(monthArg, togglAuthorization)
 
     const jiraAccountId = await getJiraAccountId()
 
@@ -218,7 +219,7 @@ async function pushToJira(params) {
 
     console.log('Completed!')
     if (!commit) {
-        console.log(`This was a dry run. Run the following command to actually push to JIRA: node push-jira ${monthArg} commit`)
+        console.log(`This was a dry run. Run the following command to actually push to JIRA: node push-jira ${monthArg || dayArg} commit`)
     }
 }
 
@@ -241,11 +242,14 @@ function getCommitArg() {
 
 async function pushWorklogs() {
     const monthArg = getMonthArg()
+    const dayArg = getDayArg()
 
-    if (monthArg) {
-        const commit = getCommitArg()
+    const commit = getCommitArg()
+
+    if (monthArg || dayArg) {
         const params = {
             monthArg,
+            dayArg,
             commit
         };
 
