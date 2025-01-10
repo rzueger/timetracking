@@ -218,9 +218,13 @@ async function pushToJira(params) {
         await pushDay(entry, jiraAccountId, commit)
     }
 
-    console.log('Completed!')
+    console.log('\x1b[92mCompleted!\x1b[0m')
     if (!commit) {
-        console.log(`This was a dry run. Run the following command to actually push to JIRA: node push-jira ${monthArg || dayArg} commit`)
+        console.log(`This was a dry run. Nothing pushed to Jira so far.`)
+        const answer = await question('\x1b[93mDo you want to push these records to Jira? (y/N)\x1b[0m')
+        if (answer === 'y' || answer === 'Y') {
+            await pushToJira({ ...params, commit: true })
+        }
     }
 }
 
