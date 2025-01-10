@@ -1,8 +1,9 @@
+const path = require('path');
 const moment = require('moment')
-const {getEntriesByDay, getEnvVar, base64, getMonthArg} = require("./utils");
+const { getEntriesByDay, getEnvVar, base64, getMonthArg, getDayArg, getEntriesForDay, question } = require("./utils");
 const dotenv = require("dotenv");
 
-dotenv.config({path: '.env.local'})
+dotenv.config({ path: path.join(__dirname, '.env.local') })
 
 const JIRA_BASE_URL = `https://${getEnvVar('JIRA_DOMAIN', true)}.atlassian.net/rest/api/3`
 const TEMPO_BASE_URL = 'https://api.tempo.io/4'
@@ -117,7 +118,7 @@ async function saveTempoWorklog(jiraAccountId, recordInfo) {
 }
 
 async function getRecordInfo(day, record) {
-    const {startTime, endTime, description} = record
+    const { startTime, endTime, description } = record
 
     const timeSpentSeconds = getDurationSeconds(startTime, endTime)
     const issueName = getIssueName(description)
@@ -140,10 +141,10 @@ function recordInfoStr(recordInfo) {
 async function pushRecord(recordInfo, jiraAccountId, commit) {
     const infoStr = recordInfoStr(recordInfo)
     if (commit) {
-        console.log(`Pushing: ${infoStr}`)
+        console.log(`\x1b[96mPushing\x1b[0m: ${infoStr}`)
         await saveTempoWorklog(jiraAccountId, recordInfo)
     } else {
-        console.log(`Would push: ${infoStr}`)
+        console.log(`\x1b[96mWould push\x1b[0m: ${infoStr}`)
     }
 }
 
@@ -179,11 +180,11 @@ async function pushDay(entry, jiraAccountId, commit) {
         for (const record of entry.records) {
             const recordInfo = await getRecordInfo(entry.day, record)
             if (isNaN(recordInfo.timeSpentSeconds)) {
-                console.log(`Record is ongoing: ${recordInfoStr(recordInfo)}. Skipping...`)
+                console.log(`Record is ongoing: ${recordInfoStr(recordInfo)}. \x1b[93mSkipping...\x1b[0m`)
             } else if (recordInfo.timeSpentSeconds === 0) {
-                console.log(`Record is has 0 seconds logged: ${recordInfoStr(recordInfo)}. Skipping...`)
+                console.log(`Record is has 0 seconds logged: ${recordInfoStr(recordInfo)}. \x1b[93mSkipping...\x1b[0m`)
             } else if (containsRecord(tempoWorklogs, record)) {
-                console.log(`Record exists: ${recordInfoStr(recordInfo)}. Skipping...`)
+                console.log(`Record exists: ${recordInfoStr(recordInfo)}. \x1b[93mSkipping...\x1b[0m`)
                 expectedTempoLogCount++
             } else {
                 await pushRecord(recordInfo, jiraAccountId, commit)
@@ -201,14 +202,15 @@ async function pushDay(entry, jiraAccountId, commit) {
 }
 
 async function pushToJira(params) {
-    const {monthArg, commit} = params
+    const { monthArg, dayArg, commit } = params
 
+    const period = dayArg ? `for the day ${dayArg}` : `for the month ${monthArg}`
     console.log(commit
-        ? `Pushing records to Jira for the month ${monthArg}`
-        : `Logging what would be pushed to Jira for the month ${monthArg}`
+        ? `Pushing records to Jira ${period}`
+        : `Logging what would be pushed to Jira ${period}`
     )
 
-    const entries = await getEntriesByDay(monthArg, togglAuthorization)
+    const entries = dayArg ? await getEntriesForDay(dayArg, togglAuthorization) : await getEntriesByDay(monthArg, togglAuthorization)
 
     const jiraAccountId = await getJiraAccountId()
 
@@ -216,9 +218,13 @@ async function pushToJira(params) {
         await pushDay(entry, jiraAccountId, commit)
     }
 
-    console.log('Completed!')
+    console.log('\x1b[92mCompleted!\x1b[0m')
     if (!commit) {
-        console.log(`This was a dry run. Run the following command to actually push to JIRA: node push-jira ${monthArg} commit`)
+        console.log(`This was a dry run. Nothing pushed to Jira so far.`)
+        const answer = await question('\x1b[93mDo you want to push these records to Jira? (y/N)\x1b[0m ')
+        if (answer === 'y' || answer === 'Y') {
+            await pushToJira({ ...params, commit: true })
+        }
     }
 }
 
@@ -240,16 +246,27 @@ function getCommitArg() {
 }
 
 async function pushWorklogs() {
-    const monthArg = getMonthArg()
+    // when there is no day/month in the args get date by question user again
+    const args = process.argv.slice(2) // Remove the first two arguments
+    let enteredArg
+    if (args.length === 0) {
+        enteredArg = await question('\x1b[93mWhat day or month do you want to push? (yyyy-mm or yyyy-mm-dd)\x1b[0m ')
+    }
 
-    if (monthArg) {
-        const commit = getCommitArg()
+    const monthArg = getMonthArg(enteredArg)
+    const dayArg = getDayArg(enteredArg)
+
+    const commit = getCommitArg()
+
+    if (monthArg || dayArg) {
         const params = {
             monthArg,
+            dayArg,
             commit
         };
 
         await pushToJira(params)
+        await question('Press ENTER to exit...')
     } else {
         showHelp()
     }

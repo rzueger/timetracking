@@ -1,6 +1,22 @@
+const readline = require('node:readline');
 const moment = require('moment')
 
 const BASE_URL = 'https://api.track.toggl.com/api/v9'
+
+function question(question) {
+    return new Promise((resolve) => {
+        const rl = readline.createInterface({
+            input: process.stdin,
+            output: process.stdout,
+        });
+
+
+        rl.question(question, answer => {
+            resolve(answer)
+            rl.close();
+        });
+    })
+}
 
 async function getEntries(startDate, endDate, projectId, authorization) {
     const response = await fetch(`${BASE_URL}/me/time_entries?start_date=${startDate}&end_date=${endDate}`, {
@@ -102,6 +118,21 @@ const getTotalDurationSum = day =>
         return formatDuration(newDurationSum)
     }, '00:00')
 
+// dayArg: YYYY-MM-DD
+const getEntriesForDay = async (dayArg, authorization) => {
+    const projectId = parseInt(getEnvVar('TOGGL_PROJECT_ID'), 10)
+
+    const startDate = dayArg
+    const endDate = moment(startDate, 'YYYY-MM-DD').add(1, 'day').format('YYYY-MM-DD')
+
+    const entries = await getEntries(startDate, endDate, projectId, authorization)
+    const byDay = groupByDay(entries)
+    addTimeBlocks(byDay)
+    addDailyHoursTotal(byDay)
+
+    return byDay
+}
+
 // monthArg: YYYY-MM
 const getEntriesByDay = async (monthArg, authorization) => {
     const projectId = parseInt(getEnvVar('TOGGL_PROJECT_ID'), 10)
@@ -142,9 +173,9 @@ const getEnvVar = (name, mandatory) => {
 
 const getArgs = () => process.argv.slice(2) // Remove the first two arguments
 
-const getMonthArg = () => {
+const getMonthArg = (inputArg) => {
     const args = getArgs()
-    const monthArg = args[0]
+    const monthArg = inputArg || args[0]
 
     // Check if the argument exists and is in the format 'yyyy-mm'
     if (monthArg && /^\d{4}-\d{2}$/.test(monthArg)) {
@@ -153,12 +184,27 @@ const getMonthArg = () => {
     return null
 }
 
+const getDayArg = (inputArg) => {
+    const args = getArgs()
+    const dayArg = inputArg || args[0]
+
+    // Check if the argument exists and is in the format 'yyyy-mm-dd'
+    if (dayArg && /^\d{4}-\d{2}-\d{2}$/.test(dayArg)) {
+        return dayArg
+    }
+    return null
+}
+
+
 const base64 = str => Buffer.from(str).toString('base64')
 
 module.exports = {
     getEntriesByDay,
+    getEntriesForDay,
     getEnvVar,
     getArgs,
     getMonthArg,
-    base64
+    getDayArg,
+    base64,
+    question
 }

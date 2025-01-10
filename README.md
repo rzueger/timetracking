@@ -20,6 +20,13 @@ Add file `.env.local` with the following content (replace '${placeholders}' with
 TOGGL_API_TOKEN=${toggl api token}
 TOGGL_PROJECT_ID=${toggl project id - optional}
 ```
+
+or run
+
+```
+npm run setup
+```
+
 ## Print records to console
 
 Call script:
@@ -48,14 +55,24 @@ TEMPO_API_TOKEN=${previously created tempo api token}
 Call script (dry mode - logs only):
 ```
 node push-jira.js ${month-arg in yyyy-mm}
+node push-jira.js ${day-arg in yyyy-mm-dd}
 ```
 e.g. `node push-jira.js 2023-12`
+
+e.g. `node push-jira.js 2025-01-06`
 
 Call script (commit mode):
 ```
 node push-jira.js ${month-arg in yyyy-mm} commit
+node push-jira.js ${day-arg in yyyy-mm-dd} commit
 ```
 e.g. `node push-jira.js 2023-12 commit`
+
+Run for this month or today directly:
+```
+npm run push:this-month
+npm run push:today
+```
 
 ## Create invoice as Google Doc
 
@@ -95,6 +112,13 @@ and click on "Share" on Google Doc to grant Editor access to the new document.
 node invoice.js ${month-arg in yyyy-mm} ${invoice-no} ${hourly-rate} ${document id}
 ```
 e.g. `node invoice.js 2023-12 20230897 120 1eDKe5SyiKLPAFdPgsuXdMT1sheIhvcOnfQafyNMsf9wasdfasdf`
-   
+
 This replaces all the variables in the documents and inserts the time records into the
 prepared table.
+
+## Build
+With webpack the setup and push-jira scripts are builded to a `dist` folder by running:
+
+```
+npm run build
+```
