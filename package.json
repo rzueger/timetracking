@@ -8,7 +8,7 @@
   ],
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "webpack",
+    "build": "webpack && chmod +x dist/*.sh && chmod +x dist/*.bat",
     "setup": "node setup.js",
     "push:this-month": "node push-jira.js \"$(date +'%Y-%m')\"",
     "push:today": "node push-jira.js \"$(date +'%Y-%m-%d')\""
@@ -36,6 +36,7 @@
   "devDependencies": {
     "copy-webpack-plugin": "^12.0.2",
     "webpack": "^5.97.1",
-    "webpack-cli": "^6.0.1"
+    "webpack-cli": "^6.0.1",
+    "webpack-node-externals": "^3.0.0"
   }
 }
