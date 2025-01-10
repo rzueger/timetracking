@@ -19,7 +19,7 @@ module.exports = {
     clean: true,
     libraryTarget: 'commonjs2'
   },
-  externals: [webpackNodeExternals()],
+  externals: [webpackNodeExternals({allowlist: ['moment', 'dotenv']})],
   plugins: [
     new CopyPlugin({
       patterns: [
