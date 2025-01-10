@@ -173,9 +173,9 @@ const getEnvVar = (name, mandatory) => {
 
 const getArgs = () => process.argv.slice(2) // Remove the first two arguments
 
-const getMonthArg = () => {
+const getMonthArg = (inputArg) => {
     const args = getArgs()
-    const monthArg = args[0]
+    const monthArg = inputArg || args[0]
 
     // Check if the argument exists and is in the format 'yyyy-mm'
     if (monthArg && /^\d{4}-\d{2}$/.test(monthArg)) {
@@ -184,9 +184,9 @@ const getMonthArg = () => {
     return null
 }
 
-const getDayArg = () => {
+const getDayArg = (inputArg) => {
     const args = getArgs()
-    const dayArg = args[0]
+    const dayArg = inputArg || args[0]
 
     // Check if the argument exists and is in the format 'yyyy-mm-dd'
     if (dayArg && /^\d{4}-\d{2}-\d{2}$/.test(dayArg)) {
